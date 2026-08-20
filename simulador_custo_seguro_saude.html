@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#084734">
+<title>Simulador de Custo Anual — Seguro Saúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Paleta oficial do template FIA Labdata */
+  --verde:#084734;
+  --verde-medio:#75A365;
+  --lima:#C3FA75;
+  --verde-claro:#E9F2DC;
+  --marinho:#142D59;
+  --cinza:#696A65;
+  --branco:#FFFFFF;
+
+  --erro:#8C2B1E;
+  --erro-bg:#FBEAE7;
+  --aviso-bg:#FFF6DC;
+  --aviso-borda:#C9A227;
+
+  --raio:14px;
+  --sombra:0 2px 10px rgba(8,71,52,.10);
+  --fonte:'DM Sans', Arial, Helvetica, sans-serif;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--fonte);
+  font-weight:400;
+  background:var(--verde-claro);
+  color:var(--verde);
+  font-size:16px;
+  line-height:1.45;
+  padding-bottom:96px;
+}
+
+/* ---------- Cabeçalho ---------- */
+header{
+  background:var(--verde);
+  color:var(--branco);
+  padding:22px 20px 20px;
+  border-bottom:5px solid var(--lima);
+}
+header .eyebrow{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--lima);font-weight:500;margin:0 0 8px;line-height:1.5;
+}
+header h1{font-size:23px;line-height:1.2;font-weight:700;margin:0 0 8px}
+header p{margin:0;font-size:13px;font-weight:300;color:#D8E6DF}
+header .modelo{
+  display:inline-block;margin-top:12px;padding:5px 10px;
+  border:1px solid rgba(195,250,117,.45);border-radius:999px;
+  font-size:11px;color:var(--lima);font-weight:500;
+}
+
+main{max-width:640px;margin:0 auto;padding:16px 14px 0}
+
+/* ---------- Blocos ---------- */
+.bloco{
+  background:var(--branco);border-radius:var(--raio);
+  box-shadow:var(--sombra);margin-bottom:14px;overflow:hidden;
+}
+.bloco > h2{
+  margin:0;padding:14px 16px 12px;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid var(--verde-claro);
+  display:flex;align-items:baseline;gap:10px;
+}
+.bloco > h2 .marca{
+  width:8px;height:8px;border-radius:2px;background:var(--lima);
+  display:inline-block;flex:0 0 auto;transform:translateY(-1px);
+}
+.bloco > h2 small{
+  margin-left:auto;font-size:10px;font-weight:400;letter-spacing:.02em;
+  text-transform:none;color:var(--cinza);
+}
+.campos{padding:6px 16px 16px}
+
+/* ---------- Campos ---------- */
+.campo{padding:12px 0;border-bottom:1px dashed #E4EBE4}
+.campo:last-child{border-bottom:none}
+.campo label{display:block;font-size:14px;font-weight:500;margin-bottom:2px}
+.campo .dica{display:block;font-size:12px;font-weight:300;color:var(--cinza);margin-bottom:8px}
+
+input[type=text],select{
+  width:100%;padding:11px 12px;font-family:var(--fonte);font-size:16px;
+  color:var(--verde);background:var(--branco);
+  border:1.5px solid #CBD8CB;border-radius:10px;appearance:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+select{
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23084734' stroke-width='2.2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:18px;
+  padding-right:38px;
+}
+input[type=text]:focus,select:focus{
+  outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(195,250,117,.55);
+}
+.campo.invalido input,.campo.invalido select{border-color:var(--erro);background:var(--erro-bg)}
+
+/* campo derivado (IMC) */
+.derivado{
+  display:flex;align-items:center;gap:12px;
+  background:var(--verde-claro);border:1.5px dashed var(--verde-medio);
+  border-radius:10px;padding:12px 14px;
+}
+.derivado .num{font-size:26px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.derivado .num.vazio{color:var(--cinza);font-weight:300;font-size:20px}
+.derivado .conta{font-size:11.5px;font-weight:300;color:var(--cinza);line-height:1.4}
+.campo.invalido .derivado{border-color:var(--erro);background:var(--erro-bg)}
+
+.msg{display:none;margin-top:7px;font-size:12.5px;font-weight:500;border-radius:8px;padding:7px 10px}
+.msg.erro{display:block;background:var(--erro-bg);color:var(--erro);border-left:3px solid var(--erro)}
+.msg.aviso{display:block;background:var(--aviso-bg);color:#6B5600;border-left:3px solid var(--aviso-borda)}
+
+.tag{
+  display:inline-block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 6px;border-radius:4px;font-weight:500;vertical-align:middle;margin-left:6px;
+}
+.tag.usa{background:var(--lima);color:var(--verde)}
+.tag.nao-usa{background:#EDEFEC;color:var(--cinza)}
+
+/* ---------- Resumo de erros ---------- */
+#resumoErros{
+  display:none;background:var(--erro-bg);border:1.5px solid var(--erro);
+  border-radius:var(--raio);padding:14px 16px;margin-bottom:14px;color:var(--erro);
+}
+#resumoErros h3{margin:0 0 6px;font-size:14px;font-weight:700}
+#resumoErros ul{margin:0;padding-left:18px;font-size:13px}
+#resumoErros li{margin:3px 0}
+#resumoErros a{color:var(--erro);text-decoration:underline}
+
+/* ---------- Ações ---------- */
+.acoes{
+  position:fixed;left:0;right:0;bottom:0;background:var(--branco);
+  border-top:1px solid #D5E0D5;padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+  z-index:20;
+}
+.acoes .interno{max-width:640px;margin:0 auto;display:flex;gap:10px;width:100%}
+button{font-family:var(--fonte);font-size:15px;font-weight:700;border-radius:10px;cursor:pointer;border:none}
+#btnCalcular{flex:1;background:var(--verde);color:var(--lima);padding:14px}
+#btnCalcular:active{background:#063528}
+.btn-sec{
+  background:var(--branco);color:var(--verde);border:1.5px solid var(--verde);
+  padding:14px 12px;font-weight:500;font-size:14px;
+}
+
+/* ---------- Resultado ---------- */
+#resultado{display:none;margin-bottom:14px}
+.card-resultado{
+  background:var(--verde);color:var(--branco);border-radius:var(--raio);
+  padding:20px 18px;box-shadow:var(--sombra);
+}
+.card-resultado .rotulo{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lima);
+  font-weight:500;margin:0 0 6px;
+}
+.card-resultado .valor{
+  font-size:38px;font-weight:700;line-height:1.05;letter-spacing:-.02em;margin:0;
+  color:var(--lima);
+}
+.card-resultado .faixa{margin:12px 0 0;font-size:13px;font-weight:300;color:#D8E6DF}
+.card-resultado .faixa b{font-weight:500;color:var(--branco)}
+.card-resultado .mensal{
+  margin-top:14px;padding-top:12px;border-top:1px solid rgba(216,230,223,.28);
+  font-size:13px;font-weight:300;color:#D8E6DF;
+}
+.card-resultado .mensal b{font-weight:500;color:var(--branco)}
+
+/* Cascata multiplicativa */
+.cascata{background:var(--branco);border-radius:var(--raio);box-shadow:var(--sombra);margin-top:14px;padding:16px}
+.cascata h3{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.cascata .sub{margin:0 0 14px;font-size:12px;font-weight:300;color:var(--cinza)}
+.linha{margin:0 0 11px}
+.linha .topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;margin-bottom:4px}
+.linha .nome{font-weight:500}
+.linha .fator{font-variant-numeric:tabular-nums;font-weight:700;font-size:12.5px;white-space:nowrap}
+.linha .fator.pos{color:var(--verde)}
+.linha .fator.neg{color:var(--marinho)}
+.linha .fator.neutro{color:var(--cinza);font-weight:400}
+.trilha{position:relative;height:9px;background:var(--verde-claro);border-radius:5px;overflow:hidden}
+.trilha .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#C3CFC3}
+.trilha .barra{position:absolute;top:0;bottom:0;border-radius:5px}
+.trilha .barra.pos{background:var(--verde-medio)}
+.trilha .barra.neg{background:var(--marinho)}
+.linha .base{height:9px;background:var(--verde);border-radius:5px}
+
+/* Seção gráfica */
+.graficos{background:var(--branco);border-radius:var(--raio);box-shadow:var(--sombra);margin-top:14px;padding:16px}
+.graficos h3{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.graficos .sub{margin:0 0 12px;font-size:12px;font-weight:300;color:var(--cinza)}
+.legenda{display:flex;flex-wrap:wrap;gap:10px 14px;margin:0 0 14px;font-size:11.5px;font-weight:400}
+.legenda span{display:flex;align-items:center;gap:6px;color:var(--verde)}
+.legenda i{width:16px;height:0;border-top-width:3px;border-top-style:solid;display:inline-block;flex:0 0 auto}
+.grafico{margin:0 0 6px}
+.grafico h4{margin:0 0 8px;font-size:12.5px;font-weight:700}
+.grafico p{margin:8px 0 0;font-size:11px;font-weight:300;color:var(--cinza);line-height:1.45}
+.valores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.valores span{
+  display:block;border-left:3px solid;padding:2px 0 2px 7px;line-height:1.25;
+}
+.valores em{display:block;font-style:normal;font-size:9.5px;font-weight:400;color:var(--cinza)}
+.valores b{display:block;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.grafico svg{width:100%;height:auto;display:block;overflow:visible}
+.grafico + .grafico{margin-top:16px;padding-top:16px;border-top:1px dashed #E4EBE4}
+
+.nota{
+  background:var(--branco);border-radius:var(--raio);box-shadow:var(--sombra);
+  margin-top:14px;padding:14px 16px;font-size:12px;font-weight:300;color:var(--cinza);line-height:1.55;
+}
+.nota b{font-weight:500;color:var(--verde)}
+details{background:var(--branco);border-radius:var(--raio);box-shadow:var(--sombra);margin-top:14px;padding:0 16px}
+details summary{
+  padding:14px 0;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
+}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:'+';font-size:20px;font-weight:400;color:var(--verde-medio)}
+details[open] summary::after{content:'–'}
+details .conteudo{padding:0 0 16px;font-size:12.5px;font-weight:300;color:var(--cinza);line-height:1.6}
+details .conteudo b{font-weight:500;color:var(--verde)}
+.formula{
+  background:var(--verde-claro);border-radius:8px;padding:11px 12px;margin:10px 0;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
+  color:var(--verde);line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-word;
+}
+rodape{display:block;text-align:center;font-size:10.5px;color:var(--cinza);padding:18px 16px 8px;font-weight:300}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">FIA Labdata · MBA Analytics e Inteligência Artificial – Data Science</p>
+  <h1>Simulador de custo anual<br>em seguro saúde</h1>
+  <p>Preencha o perfil do segurado para projetar o custo anual esperado.</p>
+  <span class="modelo">Regressão linear múltipla sobre log(custo_anual)</span>
+</header>
+
+<main>
+
+  <div id="resumoErros" role="alert" aria-live="assertive">
+    <h3 id="resumoTitulo"></h3>
+    <ul id="resumoLista"></ul>
+  </div>
+
+  <div id="resultado" aria-live="polite">
+    <div class="card-resultado">
+      <p class="rotulo">Custo anual projetado</p>
+      <p class="valor" id="valorCusto">—</p>
+      <p class="faixa" id="faixaCusto"></p>
+      <p class="mensal" id="custoMensal"></p>
+    </div>
+
+    <div class="cascata">
+      <h3>Como o valor se forma</h3>
+      <p class="sub">No modelo em log, cada fator <b>multiplica</b> o custo — ele não soma um valor fixo em reais.</p>
+      <div id="listaFatores"></div>
+    </div>
+
+    <div class="graficos">
+      <h3>Onde este perfil cai na carteira</h3>
+      <p class="sub">Distribuição do custo anual dos 2.147 segurados da base de estimação, com a posição do
+      valor projetado para o perfil informado.</p>
+      <div class="legenda">
+        <span><i style="border-color:#142D59;border-top-style:dashed"></i>Mediana da base</span>
+        <span><i style="border-color:#75A365"></i>Média da base</span>
+        <span><i style="border-color:#084734;border-top-width:4px"></i><b>Perfil simulado</b></span>
+      </div>
+
+      <div class="grafico">
+        <h4>Boxplot — custo anual (R$)</h4>
+        <div id="graficoBox"></div>
+        <div class="valores" id="valoresBox"></div>
+        <p id="legBox"></p>
+      </div>
+
+      <div class="grafico">
+        <h4>Histograma — custo anual (R$)</h4>
+        <div id="graficoHist"></div>
+        <div class="valores" id="valoresHist"></div>
+        <p id="legHist"></p>
+      </div>
+
+      <div class="grafico">
+        <h4>Histograma — log(custo anual)</h4>
+        <div id="graficoLog"></div>
+        <div class="valores" id="valoresLog"></div>
+        <p id="legLog"></p>
+      </div>
+    </div>
+
+    <div class="nota" id="notaResultado"></div>
+  </div>
+
+  <form id="formulario" novalidate>
+    <section class="bloco">
+      <h2><span class="marca"></span>Perfil demográfico <small>6 campos</small></h2>
+      <div class="campos" id="grupo-demografico"></div>
+    </section>
+
+    <section class="bloco">
+      <h2><span class="marca"></span>Perfil biométrico e clínico <small>5 campos</small></h2>
+      <div class="campos" id="grupo-clinico"></div>
+    </section>
+
+    <section class="bloco">
+      <h2><span class="marca"></span>Hábitos <small>3 campos</small></h2>
+      <div class="campos" id="grupo-habitos"></div>
+    </section>
+
+    <section class="bloco">
+      <h2><span class="marca"></span>Controle <small>1 campo</small></h2>
+      <div class="campos" id="grupo-controle"></div>
+    </section>
+  </form>
+
+  <details>
+    <summary>Modelo aplicado</summary>
+    <div class="conteudo">
+      <p>Modelo escolhido no notebook <b>Case_Custo_Seguro_Saude.ipynb</b>: regressão linear múltipla estimada por
+      OLS sobre <b>log(custo_anual)</b>, com seleção <i>stepwise backward</i> (α = 5%) — 13 variáveis retidas,
+      R² ajustado 0,559, pressupostos de normalidade (p = 0,52) e homocedasticidade (p = 0,99) atendidos.</p>
+
+      <div class="formula">IMC = peso (kg) ÷ altura (m)²
+
+ln(custo) = 7,5996
+  + 0,0220 · idade
+  + 0,0061 · imc
+  + 0,0314 · nro_condicoes_cronicas
+  + 0,0519 · fumante_sim
+  − 0,0437 · atividade_fisica_regular_sim
+  + 0,0879 · historico_familiar_doenca_grave_sim
+  + 0,1229 · regiao_Nordeste
+  − 0,1192 · regiao_Norte
+  + 0,2872 · regiao_Sudeste
+  + 0,1815 · regiao_Sul
+  + 0,1891 · escolaridade_medio
+  + 0,3297 · escolaridade_superior
+  + 0,4753 · escolaridade_pos_graduacao
+
+custo (R$) = exp( ln(custo) ) × 1,0679</div>
+
+      <p><b>Referências (categorias de base):</b> Centro-Oeste, fundamental, não fumante, sem atividade física
+      regular, sem histórico familiar de doença grave.</p>
+
+      <p><b>Fator de smearing de Duan = 1,0679.</b> Ao voltar de log para reais, exp() estima a mediana
+      condicional; o fator corrige a estimativa para a média, que é o que interessa em precificação.</p>
+
+      <p><b>Faixa de 80%:</b> custo × exp(±1,2816 × 0,3902), com desvio-padrão dos resíduos em log medido no
+      teste externo (430 segurados nunca vistos pelo modelo).</p>
+
+      <p><b>Variáveis eliminadas pelo stepwise</b> (efeito não significativo a 5% depois de controlados os demais
+      fatores): sexo, estado civil, nº de dependentes, consumo de álcool e tipo sanguíneo. Elas seguem no
+      formulário porque fazem parte do cadastro do segurado, são opcionais e entram no cálculo com
+      coeficiente zero.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Limites de uso</summary>
+    <div class="conteudo">
+      <p>No teste externo o modelo apresenta <b>MAE de R$ 4.655</b>, <b>MAPE de 32,6%</b> e <b>R² de 0,470</b>.
+      Metade da variação de custo em saúde é aleatoriedade individual não observável no cadastro.</p>
+      <p>A projeção serve para <b>precificação de grupos, provisionamento e priorização de carteira</b> — não para
+      prever o gasto de uma pessoa específica no ano seguinte. Sempre leia a faixa, não apenas o valor central.</p>
+      <p>A base de estimação tem 2.147 segurados, com idade entre 22 e 84 anos e IMC entre 15,0 e 40,9.
+      Fora dessas faixas o simulador extrapola e sinaliza o aviso na tela.</p>
+      <p><b>Sobre os gráficos.</b> A página não carrega a base bruta. O boxplot usa os valores descritivos
+      apurados no notebook (mínimo R$ 2.223,63 · Q1 R$ 8.519,20 · mediana R$ 12.440,89 · Q3 R$ 18.027,80 ·
+      máximo R$ 76.902,12 · média R$ 14.472,18) e os histogramas reconstroem o formato da distribuição pela
+      lognormal ajustada a essas estatísticas — que é exatamente a especificação do modelo, já que
+      log(custo_anual) tem assimetria +0,01.</p>
+    </div>
+  </details>
+
+  <rodape>FIA Labdata · MBA Analytics e Inteligência Artificial – Data Science<br>Simulador do modelo de produção · uso acadêmico</rodape>
+</main>
+
+<div class="acoes">
+  <div class="interno">
+    <button type="button" class="btn-sec" id="btnExemplo">Exemplo</button>
+    <button type="button" class="btn-sec" id="btnLimpar">Limpar</button>
+    <button type="button" id="btnCalcular">Calcular custo anual</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   1. VARIÁVEIS DO FORMULÁRIO
+   obrigatorio = entra no cálculo (direta ou indiretamente, via IMC)
+   ===================================================================== */
+const VARIAVEIS = [
+  {
+    id:'idade', grupo:'demografico', tipo:'inteiro', obrigatorio:true,
+    rotulo:'Idade', selo:'entra no cálculo',
+    dica:'Anos completos. Número inteiro, sem casas decimais.',
+    min:0, max:120, obsMin:22, obsMax:84, unidade:'anos'
+  },
+  {
+    id:'sexo', grupo:'demografico', tipo:'qualitativa', obrigatorio:false,
+    rotulo:'Sexo', selo:'fora do cálculo',
+    dica:'Opcional — eliminada pelo stepwise, pode ficar em branco.',
+    opcoes:[['feminino','Feminino'],['masculino','Masculino']]
+  },
+  {
+    id:'estado_civil', grupo:'demografico', tipo:'qualitativa', obrigatorio:false,
+    rotulo:'Estado civil', selo:'fora do cálculo',
+    dica:'Opcional — eliminada pelo stepwise, pode ficar em branco.',
+    opcoes:[['casado','Casado(a)'],['divorciado','Divorciado(a)'],['solteiro','Solteiro(a)'],
+            ['uniao_estavel','União estável'],['viuvo','Viúvo(a)']]
+  },
+  {
+    id:'regiao', grupo:'demografico', tipo:'qualitativa', obrigatorio:true,
+    rotulo:'Região', selo:'entra no cálculo',
+    dica:'Região de residência. Referência do modelo: Centro-Oeste.',
+    opcoes:[['Centro-Oeste','Centro-Oeste'],['Nordeste','Nordeste'],['Norte','Norte'],
+            ['Sudeste','Sudeste'],['Sul','Sul']]
+  },
+  {
+    id:'escolaridade', grupo:'demografico', tipo:'qualitativa', obrigatorio:true,
+    rotulo:'Escolaridade', selo:'entra no cálculo',
+    dica:'Maior nível concluído. Referência do modelo: fundamental.',
+    opcoes:[['fundamental','Fundamental'],['medio','Médio'],['superior','Superior'],
+            ['pos_graduacao','Pós-graduação']]
+  },
+  {
+    id:'nro_dependentes', grupo:'demografico', tipo:'inteiro', obrigatorio:false,
+    rotulo:'Número de dependentes no plano', selo:'fora do cálculo',
+    dica:'Opcional. Se preenchido, aceita apenas número inteiro.',
+    min:0, max:20, obsMin:0, obsMax:6, unidade:'dependentes'
+  },
+  {
+    id:'peso', grupo:'clinico', tipo:'decimal', obrigatorio:true, casas:1,
+    rotulo:'Peso', selo:'usado no IMC',
+    dica:'Em quilos. Aceita decimal com vírgula. Exemplo: 78,4.',
+    min:20, max:400, obsMin:35, obsMax:250, unidade:'kg'
+  },
+  {
+    id:'altura', grupo:'clinico', tipo:'decimal', obrigatorio:true, casas:2,
+    rotulo:'Altura', selo:'usado no IMC',
+    dica:'Em metros. Aceita decimal com vírgula. Exemplo: 1,72.',
+    min:0.5, max:2.6, obsMin:1.3, obsMax:2.2, unidade:'m'
+  },
+  {
+    id:'imc', grupo:'clinico', tipo:'derivado', obrigatorio:true,
+    rotulo:'IMC — índice de massa corporal', selo:'calculado · entra no cálculo',
+    dica:'Calculado automaticamente a partir do peso e da altura.',
+    min:10, max:70, obsMin:15, obsMax:40.9, unidade:'kg/m²'
+  },
+  {
+    id:'nro_condicoes_cronicas', grupo:'clinico', tipo:'inteiro', obrigatorio:true,
+    rotulo:'Número de condições crônicas diagnosticadas', selo:'entra no cálculo',
+    dica:'Número inteiro, sem casas decimais.',
+    min:0, max:20, obsMin:0, obsMax:8, unidade:'condições'
+  },
+  {
+    id:'historico_familiar_doenca_grave', grupo:'clinico', tipo:'qualitativa', obrigatorio:true,
+    rotulo:'Histórico familiar de doença grave', selo:'entra no cálculo',
+    dica:'Referência do modelo: não.',
+    opcoes:[['nao','Não'],['sim','Sim']]
+  },
+  {
+    id:'fumante', grupo:'habitos', tipo:'qualitativa', obrigatorio:true,
+    rotulo:'Fumante', selo:'entra no cálculo',
+    dica:'Referência do modelo: não.',
+    opcoes:[['nao','Não'],['sim','Sim']]
+  },
+  {
+    id:'atividade_fisica_regular', grupo:'habitos', tipo:'qualitativa', obrigatorio:true,
+    rotulo:'Pratica atividade física regular', selo:'entra no cálculo',
+    dica:'Referência do modelo: não.',
+    opcoes:[['nao','Não'],['sim','Sim']]
+  },
+  {
+    id:'consumo_alcool', grupo:'habitos', tipo:'qualitativa', obrigatorio:false,
+    rotulo:'Consumo de álcool', selo:'fora do cálculo',
+    dica:'Opcional — eliminada pelo stepwise, pode ficar em branco.',
+    opcoes:[['nenhum','Nenhum'],['baixo','Baixo'],['moderado','Moderado'],['alto','Alto']]
+  },
+  {
+    id:'tipo_sanguineo', grupo:'controle', tipo:'qualitativa', obrigatorio:false,
+    rotulo:'Tipo sanguíneo', selo:'fora do cálculo',
+    dica:'Opcional — variável de controle do estudo, pode ficar em branco.',
+    opcoes:[['A+','A+'],['A-','A−'],['AB+','AB+'],['AB-','AB−'],['B+','B+'],['B-','B−'],
+            ['O+','O+'],['O-','O−']]
+  }
+];
+
+/* =====================================================================
+   2. COEFICIENTES DO MODELO — OLS sobre log(custo_anual)
+   ===================================================================== */
+const MODELO = {
+  intercepto: 7.5996,
+  smearing: 1.0679,
+  sigmaLog: 0.3902,
+  z80: 1.2816,
+  quantitativas:{ idade:0.0220, imc:0.0061, nro_condicoes_cronicas:0.0314 },
+  qualitativas:{
+    fumante:{sim:0.0519, nao:0},
+    atividade_fisica_regular:{sim:-0.0437, nao:0},
+    historico_familiar_doenca_grave:{sim:0.0879, nao:0},
+    regiao:{'Centro-Oeste':0, 'Nordeste':0.1229, 'Norte':-0.1192, 'Sudeste':0.2872, 'Sul':0.1815},
+    escolaridade:{fundamental:0, medio:0.1891, superior:0.3297, pos_graduacao:0.4753}
+  }
+};
+
+/* =====================================================================
+   3. UTILITÁRIOS pt-BR
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const mapa = {};
+let imcAtual = null;
+
+const numeroBR = (n,c) => n.toLocaleString('pt-BR',{minimumFractionDigits:c, maximumFractionDigits:c});
+const moedaBR  = n     => n.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
+
+/* =====================================================================
+   4. MONTAGEM DO FORMULÁRIO
+   ===================================================================== */
+function montar(){
+  VARIAVEIS.forEach(v=>{
+    const box = document.createElement('div');
+    box.className = 'campo';
+    box.id = 'campo-' + v.id;
+    const tag = `<span class="tag ${v.obrigatorio ? 'usa' : 'nao-usa'}">${v.selo}</span>`;
+
+    let controle;
+    if(v.tipo === 'derivado'){
+      controle = `<div class="derivado">
+        <span class="num vazio" id="imcValor">—</span>
+        <span class="conta" id="imcConta">Informe peso e altura.</span>
+      </div>`;
+    } else if(v.tipo === 'qualitativa'){
+      controle = `<select id="${v.id}" name="${v.id}">
+        <option value="">${v.obrigatorio ? 'Selecione…' : 'Não informado'}</option>
+        ${v.opcoes.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}
+      </select>`;
+    } else {
+      const modo = v.tipo === 'inteiro' ? 'numeric' : 'decimal';
+      const ph = v.tipo === 'inteiro'
+        ? (v.obrigatorio ? 'Somente números inteiros' : 'Opcional — número inteiro')
+        : 'Use vírgula. Ex.: ' + (v.id === 'altura' ? '1,72' : '78,4');
+      controle = `<input type="text" id="${v.id}" name="${v.id}" inputmode="${modo}"
+        autocomplete="off" placeholder="${ph}">`;
+    }
+
+    box.innerHTML = `
+      <label ${v.tipo === 'derivado' ? '' : 'for="'+v.id+'"'}>${v.rotulo}${tag}</label>
+      <span class="dica">${v.dica}</span>
+      ${controle}
+      <div class="msg" id="msg-${v.id}"></div>`;
+    $('#grupo-' + v.grupo).appendChild(box);
+    mapa[v.id] = v;
+  });
+
+  VARIAVEIS.filter(v=>v.tipo !== 'derivado').forEach(v=>{
+    const el = document.getElementById(v.id);
+    el.addEventListener('blur', ()=>validarCampo(v.id));
+    el.addEventListener('change', ()=>validarCampo(v.id));
+    el.addEventListener('input', ()=>{
+      if(v.id === 'peso' || v.id === 'altura') atualizarIMC();
+      if(document.getElementById('campo-' + v.id).classList.contains('invalido')){
+        validarCampo(v.id);
+      }
+    });
+  });
+}
+
+/* =====================================================================
+   5. VALIDAÇÃO
+   ===================================================================== */
+function interpretarNumero(texto, v){
+  const s = texto.trim();
+  if(s === '') return {vazio:true};
+
+  if(/[^0-9.,\-\s]/.test(s))
+    return {erro:'Use apenas números. Foram encontrados caracteres inválidos em "'+s+'".'};
+
+  if(v.tipo === 'inteiro'){
+    if(/[.,]/.test(s))
+      return {erro:'Este campo aceita apenas número inteiro, sem casas decimais. Corrija "'+s+'".'};
+    if(!/^\d+$/.test(s))
+      return {erro:'Formato inválido: "'+s+'". Digite um número inteiro positivo, sem espaços ou sinais.'};
+    const n = parseInt(s,10);
+    if(n < v.min || n > v.max)
+      return {erro:'Valor fora do intervalo aceito ('+v.min+' a '+v.max+' '+v.unidade+'). Corrija "'+s+'".'};
+    const aviso = (n < v.obsMin || n > v.obsMax)
+      ? 'Valor fora da faixa observada na base ('+numeroBR(v.obsMin,0)+' a '+numeroBR(v.obsMax,0)+' '+v.unidade+'). O modelo extrapola e a projeção perde precisão.'
+      : null;
+    return {valor:n, aviso};
+  }
+
+  if(/\./.test(s) && /,/.test(s))
+    return {erro:'Use somente a vírgula como separador decimal. Corrija "'+s+'".'};
+  if(!/^\d+([.,]\d+)?$/.test(s))
+    return {erro:'Formato inválido: "'+s+'". Digite um número decimal com vírgula (ex.: '+(v.id==='altura'?'1,72':'78,4')+').'};
+  const n = parseFloat(s.replace(',','.'));
+  if(n < v.min || n > v.max)
+    return {erro:'Valor fora do intervalo aceito ('+numeroBR(v.min,v.casas||1)+' a '+numeroBR(v.max,v.casas||1)+' '+v.unidade+'). Corrija "'+s+'".'};
+  const aviso = (n < v.obsMin || n > v.obsMax)
+    ? 'Valor fora da faixa usual ('+numeroBR(v.obsMin,v.casas||1)+' a '+numeroBR(v.obsMax,v.casas||1)+' '+v.unidade+'). Confira se o valor está correto.'
+    : null;
+  return {valor:n, aviso};
+}
+
+function mostrarMensagem(id, texto, classe){
+  const el  = document.getElementById('msg-'+id);
+  const box = document.getElementById('campo-'+id);
+  el.className = 'msg';
+  el.textContent = '';
+  box.classList.remove('invalido');
+  if(!texto) return;
+  el.className = 'msg ' + classe;
+  el.textContent = texto;
+  if(classe === 'erro') box.classList.add('invalido');
+}
+
+function validarCampo(id){
+  const v = mapa[id];
+
+  if(v.tipo === 'derivado') return validarIMC();
+
+  const el = document.getElementById(id);
+  const bruto = el.value;
+
+  if(v.tipo === 'qualitativa'){
+    if(bruto === ''){
+      if(!v.obrigatorio){ mostrarMensagem(id, null); return {ok:true, valor:null}; }
+      const m = 'Campo obrigatório. Selecione uma opção para "'+v.rotulo+'".';
+      mostrarMensagem(id, m, 'erro');
+      return {ok:false, erro:m};
+    }
+    mostrarMensagem(id, null);
+    return {ok:true, valor:bruto};
+  }
+
+  const r = interpretarNumero(bruto, v);
+
+  if(r.vazio){
+    if(!v.obrigatorio){ mostrarMensagem(id, null); return {ok:true, valor:null}; }
+    const m = 'Campo obrigatório. Informe o valor de "'+v.rotulo+'".';
+    mostrarMensagem(id, m, 'erro');
+    return {ok:false, erro:m};
+  }
+  if(r.erro){
+    mostrarMensagem(id, r.erro, 'erro');
+    return {ok:false, erro:r.erro};
+  }
+  mostrarMensagem(id, r.aviso, r.aviso ? 'aviso' : null);
+  return {ok:true, valor:r.valor};
+}
+
+/* ---------- IMC = peso / altura² ---------- */
+function atualizarIMC(){
+  const p = interpretarNumero(document.getElementById('peso').value, mapa.peso);
+  const a = interpretarNumero(document.getElementById('altura').value, mapa.altura);
+  const alvo  = document.getElementById('imcValor');
+  const conta = document.getElementById('imcConta');
+
+  if(p.valor === undefined || a.valor === undefined || !a.valor){
+    imcAtual = null;
+    alvo.textContent = '—';
+    alvo.classList.add('vazio');
+    conta.textContent = 'Informe peso e altura.';
+    mostrarMensagem('imc', null);
+    return;
+  }
+
+  imcAtual = p.valor / (a.valor * a.valor);
+  alvo.textContent = numeroBR(imcAtual, 1);
+  alvo.classList.remove('vazio');
+  conta.innerHTML = 'kg/m² &nbsp;·&nbsp; ' + numeroBR(p.valor,1) + ' kg ÷ (' + numeroBR(a.valor,2) + ' m)²';
+  validarIMC();
+}
+
+function validarIMC(){
+  const v = mapa.imc;
+  if(imcAtual === null){
+    const m = 'IMC não calculado. Preencha peso e altura corretamente.';
+    mostrarMensagem('imc', m, 'erro');
+    return {ok:false, erro:m};
+  }
+  if(imcAtual < v.min || imcAtual > v.max){
+    const m = 'IMC calculado ('+numeroBR(imcAtual,1)+') fora do intervalo aceito ('+numeroBR(v.min,1)+' a '+numeroBR(v.max,1)+' kg/m²). Revise peso e altura.';
+    mostrarMensagem('imc', m, 'erro');
+    return {ok:false, erro:m};
+  }
+  if(imcAtual < v.obsMin || imcAtual > v.obsMax){
+    mostrarMensagem('imc','IMC fora da faixa observada na base ('+numeroBR(v.obsMin,1)+' a '+numeroBR(v.obsMax,1)+' kg/m²). O modelo extrapola e a projeção perde precisão.','aviso');
+    return {ok:true, valor:imcAtual};
+  }
+  mostrarMensagem('imc', null);
+  return {ok:true, valor:imcAtual};
+}
+
+/* =====================================================================
+   6. CÁLCULO
+   ===================================================================== */
+function calcular(perfil){
+  const fatores = [];
+  let ln = MODELO.intercepto;
+
+  Object.keys(MODELO.quantitativas).forEach(k=>{
+    const contrib = MODELO.quantitativas[k] * perfil[k];
+    ln += contrib;
+    fatores.push({
+      nome: k === 'imc' ? 'IMC' : mapa[k].rotulo,
+      detalhe: numeroBR(perfil[k], k === 'imc' ? 1 : 0) + ' ' + (mapa[k].unidade || ''),
+      efeito: Math.exp(contrib) - 1
+    });
+  });
+
+  Object.keys(MODELO.qualitativas).forEach(k=>{
+    const tabela = MODELO.qualitativas[k];
+    const b = (perfil[k] in tabela) ? tabela[perfil[k]] : 0;
+    ln += b;
+    const opcao = mapa[k].opcoes.find(o=>o[0] === perfil[k]);
+    fatores.push({
+      nome: mapa[k].rotulo,
+      detalhe: opcao ? opcao[1] : perfil[k],
+      efeito: Math.exp(b) - 1
+    });
+  });
+
+  const base  = Math.exp(MODELO.intercepto) * MODELO.smearing;
+  const custo = Math.exp(ln) * MODELO.smearing;
+  const amp   = Math.exp(MODELO.z80 * MODELO.sigmaLog);
+  return {base, custo, fatores, inferior:custo/amp, superior:custo*amp};
+}
+
+/* =====================================================================
+   7. DISTRIBUIÇÃO DA BASE E GRÁFICOS
+   Estatísticas descritivas de Custo_Seguro_Saude_Dados.txt (§4.2 do notebook).
+   O formato da distribuição é reconstruído pela lognormal ajustada a essas
+   estatísticas — a mesma especificação do modelo (log(custo) ~ normal).
+   ===================================================================== */
+const BASE = {
+  n:2147, media:14472.18, mediana:12440.89, dp:8430.12,
+  min:2223.63, q1:8519.20, q3:18027.80, max:76902.12,
+  muLog:9.4288, sigmaLog:0.542
+};
+BASE.iqr = BASE.q3 - BASE.q1;
+BASE.limiteSup = BASE.q3 + 1.5 * BASE.iqr;
+
+const CORES = {barra:'#E9F2DC', borda:'#B4C9B0', media:'#75A365',
+               mediana:'#142D59', perfil:'#084734', eixo:'#C3CFC3', texto:'#696A65'};
+
+/* Φ(z) — normal padrão acumulada (Abramowitz & Stegun 7.1.26) */
+function phi(z){
+  const s = z < 0 ? -1 : 1, x = Math.abs(z)/Math.SQRT2;
+  const t = 1/(1 + 0.3275911*x);
+  const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - 0.284496736)*t + 0.254829592)*t*Math.exp(-x*x);
+  return 0.5*(1 + s*y);
+}
+/* Φ⁻¹(p) — inversa da normal padrão (Beasley-Springer-Moro) */
+function phiInv(p){
+  const a=[-39.6968302866538,220.946098424521,-275.928510446969,138.357751867269,-30.6647980661472,2.50662827745924];
+  const b=[-54.4760987982241,161.585836858041,-155.698979859887,66.8013118877197,-13.2806815528857];
+  const c=[-0.00778489400243029,-0.322396458041136,-2.40075827716184,-2.54973253934373,4.37466414146497,2.93816398269878];
+  const d=[0.00778469570904146,0.32246712907004,2.445134137143,3.75440866190742];
+  const pl=0.02425;
+  let q,r;
+  if(p<pl){ q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p>1-pl){ q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q=p-0.5; r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+const quantilCusto = p => Math.exp(BASE.muLog + BASE.sigmaLog*phiInv(p));
+
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const milBR = v => v === 0 ? '0' : numeroBR(v/1000,0)+' mil';
+
+/* ---------- marcador vertical ---------- */
+function marcador(x, y0, y1, cor, tracejado, largura){
+  const dash = tracejado ? ' stroke-dasharray="5 4"' : '';
+  return `<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${y1}" stroke="${cor}" stroke-width="${largura}"${dash}/>`;
+}
+function marcadorPerfil(x, y0, y1){
+  return marcador(x, y0, y1, CORES.perfil, false, 2.8)
+    + `<polygon points="${(x-5).toFixed(1)},${y0} ${(x+5).toFixed(1)},${y0} ${x.toFixed(1)},${y0+7}" fill="${CORES.perfil}"/>`;
+}
+
+/* ---------- faixa de valores sob o gráfico ---------- */
+function faixaValores(itens){
+  return itens.map(i=>`<span style="border-color:${i.cor}">
+      <em>${esc(i.rotulo)}</em><b>${esc(i.valor)}</b></span>`).join('');
+}
+
+/* ---------- 1) Boxplot ---------- */
+function desenharBoxplot(projetado){
+  const W=360, H=116, ml=14, mr=18, centro=40, alturaCaixa=34;
+  const xMax = Math.max(80000, projetado*1.08);
+  const x = v => ml + (v/xMax)*(W-ml-mr);
+  const yTopo = centro - alturaCaixa/2, yBase = centro + alturaCaixa/2;
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img"
+    aria-label="Boxplot do custo anual da base com a posição do perfil simulado">`;
+
+  // bigodes e caixa
+  s += `<line x1="${x(BASE.min)}" y1="${centro}" x2="${x(BASE.q1)}" y2="${centro}" stroke="${CORES.borda}"/>`
+     + `<line x1="${x(BASE.q3)}" y1="${centro}" x2="${x(BASE.limiteSup)}" y2="${centro}" stroke="${CORES.borda}"/>`
+     + `<line x1="${x(BASE.min)}" y1="${centro-9}" x2="${x(BASE.min)}" y2="${centro+9}" stroke="${CORES.borda}"/>`
+     + `<line x1="${x(BASE.limiteSup)}" y1="${centro-9}" x2="${x(BASE.limiteSup)}" y2="${centro+9}" stroke="${CORES.borda}"/>`
+     + `<rect x="${x(BASE.q1).toFixed(1)}" y="${yTopo}" width="${(x(BASE.q3)-x(BASE.q1)).toFixed(1)}"
+          height="${alturaCaixa}" fill="${CORES.barra}" stroke="${CORES.borda}" stroke-width="1.2" rx="2"/>`;
+
+  // 94 valores atípicos acima de Q3 + 1,5·IQR (§4.3 do notebook)
+  for(let i=1;i<=94;i++){
+    const q = quantilCusto(1 - (i-0.5)/BASE.n);
+    if(q > BASE.limiteSup)
+      s += `<circle cx="${x(q).toFixed(1)}" cy="${centro}" r="2.4" fill="none" stroke="${CORES.borda}" stroke-width="1"/>`;
+  }
+
+  // referências
+  s += marcador(x(BASE.mediana), yTopo-5, yBase+5, CORES.mediana, true, 2);
+  s += marcador(x(BASE.media),   yTopo-5, yBase+5, CORES.media,   false, 2);
+  s += marcadorPerfil(x(projetado), yTopo-16, yBase+8);
+
+  // eixo
+  const yEixo = centro + 44;
+  s += `<line x1="${ml}" y1="${yEixo}" x2="${W-mr}" y2="${yEixo}" stroke="${CORES.eixo}"/>`;
+  for(let v=0; v<=xMax; v+=20000){
+    s += `<line x1="${x(v).toFixed(1)}" y1="${yEixo}" x2="${x(v).toFixed(1)}" y2="${yEixo+4}" stroke="${CORES.eixo}"/>`
+       + `<text x="${x(v).toFixed(1)}" y="${yEixo+15}" font-size="9" fill="${CORES.texto}" text-anchor="middle"
+            font-family="'DM Sans',Arial,sans-serif">${milBR(v)}</text>`;
+  }
+  s += `<text x="${(ml+W-mr)/2}" y="${H-2}" font-size="9" fill="${CORES.texto}" text-anchor="middle"
+          font-family="'DM Sans',Arial,sans-serif">Custo anual (R$)</text>`;
+  return s + '</svg>';
+}
+
+/* ---------- 2 e 3) Histogramas ---------- */
+function desenharHistograma(cfg){
+  const W=360, H=190, ml=30, mr=18, mt=24, mb=34;
+  const larguraBin = (cfg.fim - cfg.inicio)/cfg.bins;
+  const contagens = [];
+  for(let i=0;i<cfg.bins;i++){
+    const a = cfg.inicio + i*larguraBin;
+    contagens.push(BASE.n * (cfg.acumulada(a+larguraBin) - cfg.acumulada(a)));
+  }
+  const yMax = Math.max(4, Math.ceil(Math.max.apply(null, contagens)/25)*25);
+  const x = v => ml + ((v-cfg.inicio)/(cfg.fim-cfg.inicio))*(W-ml-mr);
+  const y = c => H - mb - (c/yMax)*(H-mt-mb);
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img"
+    aria-label="${esc(cfg.aria)}">`;
+
+  // grade horizontal
+  for(let c=0;c<=yMax;c+=yMax/4){
+    s += `<line x1="${ml}" y1="${y(c).toFixed(1)}" x2="${W-mr}" y2="${y(c).toFixed(1)}" stroke="${CORES.eixo}" stroke-width=".7"/>`
+       + `<text x="${ml-5}" y="${(y(c)+3).toFixed(1)}" font-size="8.5" fill="${CORES.texto}" text-anchor="end"
+            font-family="'DM Sans',Arial,sans-serif">${numeroBR(c,0)}</text>`;
+  }
+  // barras
+  contagens.forEach((c,i)=>{
+    if(c <= 0.4) return;
+    const a = cfg.inicio + i*larguraBin;
+    const lx = x(a), lw = Math.max(0.6, x(a+larguraBin)-lx-0.8);
+    s += `<rect x="${lx.toFixed(2)}" y="${y(c).toFixed(2)}" width="${lw.toFixed(2)}"
+        height="${(H-mb-y(c)).toFixed(2)}" fill="${CORES.barra}" stroke="${CORES.borda}" stroke-width=".8"/>`;
+  });
+  // referências
+  const dentro = v => v >= cfg.inicio && v <= cfg.fim;
+  if(dentro(cfg.mediana)) s += marcador(x(cfg.mediana), mt, H-mb, CORES.mediana, true, 2.2);
+  if(dentro(cfg.media))   s += marcador(x(cfg.media),   mt, H-mb, CORES.media,   false, 2.2);
+  if(dentro(cfg.perfil))  s += marcadorPerfil(x(cfg.perfil), mt-10, H-mb);
+  // eixo X
+  s += `<line x1="${ml}" y1="${H-mb}" x2="${W-mr}" y2="${H-mb}" stroke="${CORES.eixo}"/>`;
+  cfg.ticks.forEach(t=>{
+    s += `<line x1="${x(t).toFixed(1)}" y1="${H-mb}" x2="${x(t).toFixed(1)}" y2="${H-mb+4}" stroke="${CORES.eixo}"/>`
+       + `<text x="${x(t).toFixed(1)}" y="${H-mb+15}" font-size="9" fill="${CORES.texto}" text-anchor="middle"
+            font-family="'DM Sans',Arial,sans-serif">${esc(cfg.rotuloTick(t))}</text>`;
+  });
+  s += `<text x="${(ml+W-mr)/2}" y="${H-4}" font-size="9" fill="${CORES.texto}" text-anchor="middle"
+          font-family="'DM Sans',Arial,sans-serif">${esc(cfg.tituloX)}</text>`;
+  s += `<text x="2" y="${mt-15}" font-size="8.5" fill="${CORES.texto}"
+          font-family="'DM Sans',Arial,sans-serif">Frequência</text>`;
+  return s + '</svg>';
+}
+
+function desenharGraficos(custo){
+  const logCusto = Math.log(custo);
+  const percentil = phi((logCusto - BASE.muLog)/BASE.sigmaLog);
+  const limiteHist = Math.max(80000, custo*1.08);
+
+  /* --- boxplot --- */
+  $('#graficoBox').innerHTML = desenharBoxplot(custo);
+  $('#valoresBox').innerHTML = faixaValores([
+    {cor:CORES.mediana, rotulo:'Mediana da base', valor:moedaBR(BASE.mediana)},
+    {cor:CORES.media,   rotulo:'Média da base',   valor:moedaBR(BASE.media)},
+    {cor:CORES.perfil,  rotulo:'Perfil simulado', valor:moedaBR(custo)}
+  ]);
+  $('#legBox').textContent =
+    'Q1 ' + moedaBR(BASE.q1) + ' · Q3 ' + moedaBR(BASE.q3) +
+    ' · limite superior ' + moedaBR(BASE.limiteSup) + ' (Q3 + 1,5·IQR), com 94 valores atípicos acima dele.';
+
+  /* --- histograma em R$ --- */
+  $('#graficoHist').innerHTML = desenharHistograma({
+    inicio:0, fim:limiteHist, bins:40,
+    acumulada: v => v <= 0 ? 0 : phi((Math.log(v) - BASE.muLog)/BASE.sigmaLog),
+    ticks:[0,20000,40000,60000,80000].filter(t=>t<=limiteHist),
+    rotuloTick: milBR, tituloX:'Custo anual (R$)',
+    media:BASE.media, mediana:BASE.mediana, perfil:custo,
+    aria:'Histograma do custo anual em reais com a posição do perfil simulado'
+  });
+  $('#valoresHist').innerHTML = faixaValores([
+    {cor:CORES.mediana, rotulo:'Mediana da base', valor:moedaBR(BASE.mediana)},
+    {cor:CORES.media,   rotulo:'Média da base',   valor:moedaBR(BASE.media)},
+    {cor:CORES.perfil,  rotulo:'Perfil simulado', valor:moedaBR(custo)}
+  ]);
+  $('#legHist').textContent =
+    'Assimetria +1,64: a média supera a mediana em 16%, efeito da cauda longa à direita.';
+
+  /* --- histograma em log --- */
+  $('#graficoLog').innerHTML = desenharHistograma({
+    inicio:7.4, fim:11.4, bins:32,
+    acumulada: v => phi((v - BASE.muLog)/BASE.sigmaLog),
+    ticks:[8,9,10,11], rotuloTick: t => numeroBR(t,1), tituloX:'log(custo anual)',
+    media:Math.log(BASE.media), mediana:Math.log(BASE.mediana), perfil:logCusto,
+    aria:'Histograma do log do custo anual com a posição do perfil simulado'
+  });
+  $('#valoresLog').innerHTML = faixaValores([
+    {cor:CORES.mediana, rotulo:'log da mediana', valor:numeroBR(Math.log(BASE.mediana),3)},
+    {cor:CORES.media,   rotulo:'log da média',   valor:numeroBR(Math.log(BASE.media),3)},
+    {cor:CORES.perfil,  rotulo:'log do perfil',  valor:numeroBR(logCusto,3)}
+  ]);
+  $('#legLog').textContent =
+    'Assimetria +0,01: é nesta escala que o modelo foi estimado. O perfil simulado está no percentil ' +
+    numeroBR(percentil*100,0) + ' da carteira.';
+}
+
+/* =====================================================================
+   8. RESULTADO
+   ===================================================================== */
+function desenharResultado(r){
+  $('#valorCusto').textContent = moedaBR(r.custo);
+  $('#faixaCusto').innerHTML =
+    'Faixa de 80% de confiança: <b>' + moedaBR(r.inferior) + '</b> a <b>' + moedaBR(r.superior) + '</b>';
+  $('#custoMensal').innerHTML = 'Equivalente mensal: <b>' + moedaBR(r.custo/12) + '</b>';
+
+  const maxEfeito = Math.max(0.05, ...r.fatores.map(f=>Math.abs(f.efeito)));
+  let html = `
+    <div class="linha">
+      <div class="topo"><span class="nome">Ponto de partida do modelo</span>
+      <span class="fator neutro">${moedaBR(r.base)}</span></div>
+      <div class="base"></div>
+    </div>`;
+
+  r.fatores.slice().sort((a,b)=>Math.abs(b.efeito)-Math.abs(a.efeito)).forEach(f=>{
+    const pct = f.efeito * 100;
+    const classe = Math.abs(pct) < 0.05 ? 'neutro' : (pct > 0 ? 'pos' : 'neg');
+    const larg = Math.min(50, Math.abs(f.efeito)/maxEfeito*50);
+    const barra = classe === 'neutro' ? ''
+      : `<div class="barra ${classe}" style="${pct>0?'left:50%':'right:50%'};width:${larg}%"></div>`;
+    const rot = (pct >= 0 ? '+' : '−') + numeroBR(Math.abs(pct),1) + '%';
+    html += `
+      <div class="linha">
+        <div class="topo">
+          <span class="nome">${f.nome} <span style="font-weight:300;color:var(--cinza)">· ${f.detalhe}</span></span>
+          <span class="fator ${classe}">${classe === 'neutro' ? 'sem efeito' : rot}</span>
+        </div>
+        <div class="trilha"><div class="zero"></div>${barra}</div>
+      </div>`;
+  });
+  $('#listaFatores').innerHTML = html;
+
+  $('#notaResultado').innerHTML =
+    '<b>Como ler este número.</b> A projeção é o custo esperado de um segurado com esse perfil, não uma previsão ' +
+    'do gasto de uma pessoa específica. No teste externo o modelo erra em média 32,6% por segurado, e é por isso ' +
+    'que a faixa de 80% acompanha o valor central. Para precificação, use a faixa para dimensionar a margem.';
+
+  desenharGraficos(r.custo);
+
+  $('#resultado').style.display = 'block';
+  $('#resultado').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* =====================================================================
+   9. AÇÕES
+   ===================================================================== */
+$('#btnCalcular').addEventListener('click', ()=>{
+  const perfil = {};
+  const pendencias = [];
+
+  VARIAVEIS.forEach(v=>{
+    const r = validarCampo(v.id);
+    if(r.ok){ if(r.valor !== null) perfil[v.id] = r.valor; }
+    else pendencias.push({id:v.id, rotulo:v.rotulo, erro:r.erro});
+  });
+
+  const caixa = $('#resumoErros');
+  if(pendencias.length){
+    $('#resultado').style.display = 'none';
+    $('#resumoTitulo').textContent = pendencias.length === 1
+      ? 'Corrija 1 campo para executar o modelo'
+      : 'Corrija ' + pendencias.length + ' campos para executar o modelo';
+    $('#resumoLista').innerHTML = pendencias
+      .map(p=>`<li><a href="#campo-${p.id}">${p.rotulo}</a>: ${p.erro}</li>`).join('');
+    caixa.style.display = 'block';
+    caixa.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+
+  caixa.style.display = 'none';
+  desenharResultado(calcular(perfil));
+});
+
+$('#btnLimpar').addEventListener('click', ()=>{
+  VARIAVEIS.forEach(v=>{
+    if(v.tipo !== 'derivado') document.getElementById(v.id).value = '';
+    mostrarMensagem(v.id, null);
+  });
+  imcAtual = null;
+  atualizarIMC();
+  $('#resumoErros').style.display = 'none';
+  $('#resultado').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* ---------- Exemplo aleatório dentro dos limites ---------- */
+const sorteioInt = (a,b) => Math.floor(Math.random()*(b-a+1)) + a;
+const sorteioNum = (a,b,c) => (Math.random()*(b-a)+a).toFixed(c).replace('.',',');
+
+$('#btnExemplo').addEventListener('click', ()=>{
+  // altura e IMC-alvo dentro da faixa observada; o peso decorre de IMC × altura²
+  const altura = Math.random()*(1.95-1.50) + 1.50;
+  const imcAlvo = Math.random()*(34-18) + 18;
+  const peso = imcAlvo * altura * altura;
+
+  VARIAVEIS.forEach(v=>{
+    if(v.tipo === 'derivado') return;
+    const el = document.getElementById(v.id);
+    if(v.id === 'altura')      el.value = numeroBR(altura, 2);
+    else if(v.id === 'peso')   el.value = numeroBR(peso, 1);
+    else if(v.tipo === 'inteiro')  el.value = String(sorteioInt(v.obsMin, v.obsMax));
+    else if(v.tipo === 'decimal')  el.value = sorteioNum(v.obsMin, v.obsMax, v.casas || 1);
+    else if(v.tipo === 'qualitativa')
+      el.value = v.opcoes[Math.floor(Math.random()*v.opcoes.length)][0];
+    mostrarMensagem(v.id, null);
+  });
+
+  atualizarIMC();
+  $('#resumoErros').style.display = 'none';
+  $('#resultado').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+montar();
+atualizarIMC();
+</script>
+</body>
+</html>
