@@ -48,11 +48,29 @@ header{
   padding:22px 20px 20px;
   border-bottom:5px solid var(--lima);
 }
+header .voltar{
+  display:inline-flex;align-items:center;gap:5px;margin:0 0 14px;
+  padding:6px 12px 6px 8px;border-radius:999px;
+  border:1px solid rgba(195,250,117,.40);background:rgba(195,250,117,.08);
+  color:var(--lima);text-decoration:none;font-size:12px;font-weight:500;line-height:1;
+  transition:background .15s, border-color .15s;
+}
+header .voltar svg{width:11px;height:11px;flex:0 0 auto}
+header .voltar:active{background:rgba(195,250,117,.20)}
+header .voltar:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(195,250,117,.45)}
+@media (hover:hover){header .voltar:hover{background:rgba(195,250,117,.18);border-color:var(--lima)}}
+
 header .eyebrow{
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--lima);font-weight:500;margin:0 0 8px;line-height:1.5;
+  color:var(--lima);font-weight:500;margin:0 0 10px;line-height:1.5;
 }
-header h1{font-size:23px;line-height:1.2;font-weight:700;margin:0 0 8px}
+header .titulo{display:flex;align-items:center;gap:13px;margin:0 0 10px}
+header .glifo{
+  flex:0 0 auto;width:52px;height:52px;border-radius:11px;background:var(--verde-claro);
+  display:flex;align-items:center;justify-content:center;
+}
+header .glifo svg{width:34px;height:34px;display:block}
+header h1{font-size:21px;line-height:1.18;font-weight:700;margin:0;letter-spacing:-.01em}
 header p{margin:0;font-size:13px;font-weight:300;color:#D8E6DF}
 header .modelo{
   display:inline-block;margin-top:12px;padding:5px 10px;
@@ -233,6 +251,14 @@ details .conteudo ul{padding-left:18px;margin:8px 0}
   font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
   color:var(--verde);line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-word;
 }
+.voltar-rodape{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  margin-top:14px;padding:14px 16px;border-radius:var(--raio);
+  background:var(--branco);box-shadow:var(--sombra);border:1.5px solid var(--verde);
+  color:var(--verde);text-decoration:none;font-size:14px;font-weight:500;
+}
+.voltar-rodape svg{width:13px;height:13px;flex:0 0 auto}
+.voltar-rodape:active{background:var(--verde-claro)}
 rodape{display:block;text-align:center;font-size:10.5px;color:var(--cinza);padding:18px 16px 8px;font-weight:300}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -241,8 +267,32 @@ rodape{display:block;text-align:center;font-size:10.5px;color:var(--cinza);paddi
 <body>
 
 <header>
+  <a class="voltar" href="https://simulador-academico.onrender.com">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    Simuladores acadêmicos
+  </a>
+
   <p class="eyebrow">FIA Labdata · MBA Analytics e Inteligência Artificial – Data Science</p>
-  <h1>Simulador de consumo<br>residencial de energia</h1>
+
+  <div class="titulo">
+    <span class="glifo" aria-hidden="true">
+      <!-- árvore de decisão: raiz, dois cortes, quatro folhas -->
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 9v3M16 12H9.5v2M16 12h6.5v2M9.5 18v2.5H6.5V22M9.5 20.5h3V22M22.5 18v2.5h-3V22M22.5 20.5h3V22"
+              stroke="#75A365" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="16" cy="6.5" r="3" fill="#084734"/>
+        <circle cx="9.5" cy="16" r="2.3" fill="#084734"/>
+        <circle cx="22.5" cy="16" r="2.3" fill="#084734"/>
+        <rect x="4.5" y="22" width="4" height="4" rx="1" fill="#75A365"/>
+        <rect x="10.5" y="22" width="4" height="4" rx="1" fill="#75A365"/>
+        <rect x="17.5" y="22" width="4" height="4" rx="1" fill="#75A365"/>
+        <rect x="23.5" y="22" width="4" height="4" rx="1" fill="#75A365"/>
+      </svg>
+    </span>
+    <h1>Simulador de consumo residencial de energia</h1>
+  </div>
+
   <p>Preencha as características do imóvel para projetar o consumo médio mensal de energia elétrica, em kWh.</p>
   <span class="modelo">CatBoost · Case G — Métodos de projeção com modelos baseados em árvores</span>
 </header>
@@ -413,6 +463,12 @@ Conversão aritmética posterior (não faz parte do modelo)
       produz necessariamente a economia que o modelo associa a esse perfil.</p>
     </div>
   </details>
+
+  <a class="voltar-rodape" href="https://simulador-academico.onrender.com">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    Voltar aos simuladores acadêmicos
+  </a>
 
   <rodape>FIA Labdata · MBA Analytics e Inteligência Artificial – Data Science<br>Case G — Consumo Residencial de Energia · Uso Acadêmico</rodape>
 </main>
